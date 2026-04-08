@@ -10,7 +10,7 @@ Minder is the person memory organ (Monad Leg 3). It manages observations about p
 - **Test runner:** Node.js built-in (`node --test`)
 - **Database:** PostgreSQL `minder` on localhost:5432 (existing — do NOT create tables)
 - **Spine:** WebSocket connection to Spine ESB at ws://127.0.0.1:4000
-- **Embedding:** Vectr sidecar at http://127.0.0.1:3901 (graceful degradation)
+- **Vectr:** embedding sidecar at http://127.0.0.1:3901 (graceful degradation)
 - **LLM:** 5 internal service agents via `@coretex/organ-boot/llm-client`
 - **Boot:** Uses `createOrgan()` from `@coretex/organ-boot`
 

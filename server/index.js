@@ -18,6 +18,7 @@ import { createDreamRouter } from './routes/dream.js';
 import { createIdentityRouter } from './routes/identity.js';
 import { createConfigRouter } from './routes/minder-config.js';
 import { createStatsRouter } from './routes/stats.js';
+import { createSnapshotRouter } from './routes/snapshot.js';
 import { createMessageHandler } from './handlers/messages.js';
 import { runDreamCycle } from './dream/scheduler.js';
 
@@ -69,6 +70,7 @@ const organ = await createOrgan({
   spineUrl: config.spineUrl,
 
   routes: (app) => {
+    app.use('/', createSnapshotRouter(pool));
     app.use('/peers', createPeersRouter(pool));
     app.use('/', createIngestRouter(pool, agents, vectr, config.deriveTokenThreshold));
     app.use('/', createUnderstandingRouter(pool, agents, vectr));

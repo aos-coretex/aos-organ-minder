@@ -20,6 +20,7 @@ import { createConfigRouter } from './routes/minder-config.js';
 import { createStatsRouter } from './routes/stats.js';
 import { createSnapshotRouter } from './routes/snapshot.js';
 import { createMessageHandler } from './handlers/messages.js';
+import { createToolHandler } from './tool-handler.js';
 import { runDreamCycle } from './dream/scheduler.js';
 
 // --- State ---
@@ -81,6 +82,18 @@ const organ = await createOrgan({
   },
 
   onMessage: createMessageHandler(pool, agents, vectr, triggerDream),
+
+  // MP-TOOL-1 R4: tool-call health gate scopes to DB only. Vectr + LLM
+  // degradation surface per-tool (EMBEDDING_UNAVAILABLE / llm_unavailable)
+  // rather than failing all 14 tools closed. Matches the R3 pattern.
+  toolCallHandler: createToolHandler(
+    { pool, vectr, agents, triggerDream, deriveTokenThreshold: config.deriveTokenThreshold },
+    {
+      healthCheck: async () => ({
+        db: await checkDb(pool),
+      }),
+    }
+  ),
 
   subscriptions: [
     { event_type: 'dream_trigger' },

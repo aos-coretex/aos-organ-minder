@@ -32,7 +32,14 @@ export function createConfigRouter(pool) {
   });
 
   // PUT /config/:key
+  // c2a-http-route-03: return the MP-TOOL-1 R7 tool_call_response payload shape
+  // so MCP-Router's _callHttp (which wraps the response body as `result`) yields
+  // {result:{status:"SUCCESS",data,tool,elapsed_ms,meta}} — the conformance-scan
+  // classifier reads result.status and expects a value from the closed enum.
+  // Pre-fix shape was {key, value, status:"updated"} which collided with the
+  // classifier's result.status probe.
   router.put('/config/:key', async (req, res) => {
+    const startTime = Date.now();
     try {
       const { key } = req.params;
       const { value } = req.body;
@@ -43,7 +50,13 @@ export function createConfigRouter(pool) {
         ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = NOW()
       `, [key, JSON.stringify(value)]);
 
-      res.json({ key, value, status: 'updated' });
+      res.json({
+        status: 'SUCCESS',
+        data: { key, value },
+        tool: 'minder__config',
+        elapsed_ms: Date.now() - startTime,
+        meta: { transport: 'http', organ: 'minder' },
+      });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }

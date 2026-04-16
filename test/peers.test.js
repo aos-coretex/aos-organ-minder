@@ -35,10 +35,17 @@ describe('Peer routes', () => {
     });
 
     assert.equal(status, 201);
-    assert.equal(data.peer_id, 'urn:minder:peer:leon-cohen-levy');
-    assert.equal(data.name, 'Leon Cohen-Levy');
-    assert.equal(data.peer_type, 'human');
-    assert.equal(data.status, 'active');
+    // R7 envelope (c2a-http-route-03)
+    assert.equal(data.status, 'SUCCESS');
+    assert.equal(data.tool, 'minder__register_peer');
+    assert.equal(data.meta.transport, 'http');
+    assert.equal(data.meta.organ, 'minder');
+    assert.ok(typeof data.elapsed_ms === 'number');
+    // Payload — peer lifecycle state preserved inside data.peer_status
+    assert.equal(data.data.peer_id, 'urn:minder:peer:leon-cohen-levy');
+    assert.equal(data.data.name, 'Leon Cohen-Levy');
+    assert.equal(data.data.peer_type, 'human');
+    assert.equal(data.data.peer_status, 'active');
   });
 
   it('POST /peers returns 409 when peer already exists', async () => {
@@ -76,6 +83,14 @@ describe('Peer routes', () => {
 
     const { status, data } = await request(app, 'DELETE', `/peers/${encodeURIComponent('urn:minder:peer:leon')}`);
     assert.equal(status, 200);
-    assert.equal(data.status, 'retired');
+    // R7 envelope (c2a-http-route-03)
+    assert.equal(data.status, 'SUCCESS');
+    assert.equal(data.tool, 'minder__retire_peer');
+    assert.equal(data.meta.transport, 'http');
+    assert.equal(data.meta.organ, 'minder');
+    assert.ok(typeof data.elapsed_ms === 'number');
+    // Payload — peer lifecycle state preserved inside data.peer_status
+    assert.equal(data.data.peer_id, 'urn:minder:peer:leon');
+    assert.equal(data.data.peer_status, 'retired');
   });
 });

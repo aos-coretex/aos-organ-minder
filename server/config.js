@@ -5,6 +5,9 @@
  * Database: PostgreSQL `minder` on localhost:5432
  */
 
+const vaultRoot = process.env.VAULT_ROOT
+  || '/Library/AI/AI-Infra-MDvaults/MDvault-LLM-Ops';
+
 export const config = {
   port: parseInt(process.env.MINDER_PORT || '4007', 10),
   binding: '127.0.0.1',
@@ -26,4 +29,7 @@ export const config = {
 
   deriveTokenThreshold: parseInt(process.env.DERIVE_TOKEN_THRESHOLD || '1000', 10),
   cardMaxEntries: parseInt(process.env.CARD_MAX_ENTRIES || '40', 10),
+
+  vaultRoot,
+  settingsRoot: process.env.SETTINGS_ROOT || `${vaultRoot}/01-Organs`,
 };

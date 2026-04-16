@@ -7,6 +7,7 @@
  */
 
 import { createOrgan } from '@coretex/organ-boot';
+import { initializeUsageAttribution } from '@coretex/organ-boot/usage-attribution';
 import { config } from './config.js';
 import { createPool, verifySchema, checkDb } from './db/pool.js';
 import { createVectrClient } from './vectr.js';
@@ -40,7 +41,10 @@ function getDreamState() {
 
 const pool = createPool(config.db);
 const vectr = createVectrClient(config.vectrUrl, config.vectrTimeoutMs);
-const agents = createAgents();
+const agents = createAgents({ settingsRoot: config.settingsRoot });
+
+// MP-CONFIG-1 R9 — register the process-default usage writer.
+initializeUsageAttribution({ organName: 'Minder' });
 
 async function triggerDream(peerId = null, force = false) {
   if (!agents.isAvailable()) {
@@ -111,6 +115,8 @@ const organ = await createOrgan({
   introspectCheck: async () => ({
     dream_state: getDreamState(),
     llm_usage: agents.getUsage(),
+    // MP-CONFIG-1 R6 — flat per bug #9; consumed by Axon aggregator R8.
+    llm: agents.introspect(),
   }),
 
   onStartup: async () => {
